@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.aliyuce.rickandmorty.features.episodes.EpisodesScreen
+import com.aliyuce.rickandmorty.features.episodes.EpisodesRoute
+import com.aliyuce.rickandmorty.features.episodes.episodesRoute
 
 @Composable
 fun AppNavHost(
@@ -14,16 +14,13 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "episodes",
+        startDestination = EpisodesRoute.ROUTE,
         modifier = modifier,
     ) {
-        composable("episodes") {
-            EpisodesScreen(
-                modifier = Modifier,
-                onEpisodeClick = { episodeId: String ->
-                    // navController.navigate("episodeDetail/$episodeId")
-                },
-            )
-        }
+        episodesRoute(
+            onEpisodeClick = { episodeId ->
+                // Handle episode click navigation here
+            }
+        )
     }
 }
