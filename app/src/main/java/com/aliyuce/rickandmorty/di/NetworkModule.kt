@@ -1,36 +1,61 @@
 package com.aliyuce.rickandmorty.di
 
+import com.aliyuce.rickandmorty.BuildConfig
 import com.aliyuce.rickandmorty.data.remote.RickAndMortyApi
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val BASE_URL = "https://rickandmortyapi.com"
 
-    private val json = Json { ignoreUnknownKeys = true }
-
-    private val logging =
-        HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
-
-    private val client =
-        OkHttpClient
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi =
+        Moshi
             .Builder()
-            .addInterceptor(logging)
+            .add(KotlinJsonAdapterFactory())
             .build()
 
-    private val retrofit =
-        Retrofit
-            .Builder()
+    @Provides
+    @Singleton
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor =
+        HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BASIC
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
+        }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+        OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(moshi: Moshi, client: OkHttpClient): Retrofit =
+        Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(client)
             .build()
 
-    val api: RickAndMortyApi = retrofit.create(RickAndMortyApi::class.java)
+    @Provides
+    @Singleton
+    fun provideRickAndMortyApi(retrofit: Retrofit): RickAndMortyApi =
+        retrofit.create(RickAndMortyApi::class.java)
 }

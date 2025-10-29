@@ -40,8 +40,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -80,8 +82,9 @@ dependencies {
 
     // Networking
     implementation(libs.retrofit)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.retrofit2.moshi.converter)
     implementation(libs.logging.interceptor)
 
     // Room

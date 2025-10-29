@@ -1,9 +1,9 @@
 package com.aliyuce.rickandmorty.data.remote.model
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
-@Serializable
+@JsonClass(generateAdapter = true)
 data class Info(
     val count: Int,
     val pages: Int,
@@ -11,22 +11,22 @@ data class Info(
     val prev: String? = null,
 )
 
-@Serializable
+@JsonClass(generateAdapter = true)
 data class EpisodeResponse(
     val info: Info,
     val results: List<Episode>,
 )
 
-@Serializable
+@JsonClass(generateAdapter = true)
 data class Episode(
     val id: Int,
     val name: String,
-    @SerialName("air_date") val airDate: String,
+    @Json(name = "air_date") val airDate: String,
     val episode: String,
     val characters: List<String>,
 )
 
-@Serializable
+@JsonClass(generateAdapter = true)
 data class Character(
     val id: Int,
     val name: String,
@@ -37,7 +37,7 @@ data class Character(
     val episode: List<String> = emptyList(),
 )
 
-@Serializable
+@JsonClass(generateAdapter = true)
 data class Origin(
     val name: String,
     val url: String? = null,
