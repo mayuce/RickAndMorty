@@ -2,6 +2,8 @@ package com.aliyuce.rickandmorty.features.episodes.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aliyuce.rickandmorty.domain.model.Episode
+import com.aliyuce.rickandmorty.domain.model.EpisodesPage
 import com.aliyuce.rickandmorty.features.episodes.domain.GetEpisodesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,8 +48,8 @@ class EpisodesViewModel
             viewModelScope.launch {
                 val result = getEpisodesUseCase(page)
                 result
-                    .onSuccess { response ->
-                        val prevEpisodes =
+                    .onSuccess { response: EpisodesPage ->
+                        val prevEpisodes: List<Episode> =
                             when (val state = _uiState.value) {
                                 is EpisodesUiState.Success -> state.episodes
                                 else -> emptyList()
@@ -59,7 +61,7 @@ class EpisodesViewModel
                             EpisodesUiState.Success(
                                 episodes = combined,
                                 page = page,
-                                totalPages = response.info.pages,
+                                totalPages = response.pages,
                                 isRefreshing = false,
                                 isLoadingMore = false,
                                 error = null,

@@ -1,6 +1,6 @@
 package com.aliyuce.rickandmorty.features.episodes.presentation
 
-import com.aliyuce.rickandmorty.data.remote.model.Episode
+import com.aliyuce.rickandmorty.domain.model.Episode
 
 sealed interface EpisodesUiState {
     object Loading : EpisodesUiState

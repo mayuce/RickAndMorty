@@ -1,7 +1,7 @@
 package com.aliyuce.rickandmorty.features.episodes.domain
 
-import com.aliyuce.rickandmorty.data.RMRepository
-import com.aliyuce.rickandmorty.data.remote.model.EpisodeResponse
+import com.aliyuce.rickandmorty.domain.RMRepository
+import com.aliyuce.rickandmorty.domain.model.EpisodesPage
 import javax.inject.Inject
 
 class GetEpisodesUseCase
@@ -9,5 +9,5 @@ class GetEpisodesUseCase
     constructor(
         private val repository: RMRepository,
     ) {
-        suspend operator fun invoke(page: Int = 1): Result<EpisodeResponse> = repository.getEpisodes(page = page)
+        suspend operator fun invoke(page: Int = 1): Result<EpisodesPage> = repository.getEpisodes(page = page)
     }

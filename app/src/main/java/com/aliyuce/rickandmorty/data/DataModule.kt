@@ -1,5 +1,6 @@
 package com.aliyuce.rickandmorty.data
 
+import com.aliyuce.rickandmorty.domain.RMRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
