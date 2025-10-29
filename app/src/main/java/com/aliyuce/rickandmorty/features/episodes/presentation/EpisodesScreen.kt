@@ -1,7 +1,6 @@
 package com.aliyuce.rickandmorty.features.episodes.presentation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
 @Composable
@@ -63,8 +62,15 @@ private fun Episodes(
                 when (val state = uiState) {
                     is EpisodesUiState.Loading -> CircularProgressIndicator()
                     is EpisodesUiState.Error -> {
-                        // TODO Add better error handling UI
-                        Text(text = "Error: ${state.message}")
+                        ErrorComp(
+                            error = state.throwable.message,
+                            onRetry = {
+                                onLoadMore(1)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
                     }
 
                     is EpisodesUiState.Success -> {
@@ -116,15 +122,15 @@ private fun Episodes(
 
                             state.error?.let {
                                 item {
-                                    Box(
+                                    ErrorComp(
+                                        error = it.message,
+                                        onRetry = {
+                                            onLoadMore(state.page + 1)
+                                        },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.errorContainer)
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(text = it.message ?: "Unknown Error", color = MaterialTheme.colorScheme.error)
-                                    }
+                                            .padding(16.dp)
+                                    )
                                 }
                             }
                         }

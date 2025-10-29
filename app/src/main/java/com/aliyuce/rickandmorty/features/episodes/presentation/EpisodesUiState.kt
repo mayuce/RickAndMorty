@@ -15,6 +15,6 @@ sealed interface EpisodesUiState {
     ) : EpisodesUiState
 
     data class Error(
-        val message: Throwable,
+        val throwable: Throwable,
     ) : EpisodesUiState
 }
