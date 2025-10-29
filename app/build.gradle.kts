@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -28,7 +30,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -41,6 +43,28 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config = files("$rootDir/config/detekt/detekt.yml")
+    parallel = true
+    autoCorrect = false
+}
+
+ktlint {
+    android = true
+    debug = true
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+        ),
+    )
+    filter {
+        exclude { it.file.absolutePath.contains("/generated/") }
+        exclude { it.file.absolutePath.contains("/test/") }
+        exclude { it.file.absolutePath.contains("/androidTest/") }
     }
 }
 
@@ -90,4 +114,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    detektPlugins("io.nlopez.compose.rules:detekt:0.4.27")
 }

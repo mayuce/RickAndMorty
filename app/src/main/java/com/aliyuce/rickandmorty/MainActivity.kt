@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 AppNavHost(
                     navController = navController,
-                    modifier = Modifier
+                    modifier = Modifier,
                 )
             }
         }

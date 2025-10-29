@@ -8,11 +8,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun EpisodesScreen(modifier: Modifier = Modifier, onEpisodeClick: (String) -> Unit = {}) {
+fun EpisodesScreen(
+    modifier: Modifier = Modifier,
+    onEpisodeClick: (String) -> Unit = {},
+) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             text = "Hello, Rick and Morty!",
-            modifier = Modifier
+            modifier = Modifier,
         )
     }
 }

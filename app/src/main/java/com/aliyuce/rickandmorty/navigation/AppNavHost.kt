@@ -10,21 +10,20 @@ import com.aliyuce.rickandmorty.features.episodes.EpisodesScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
         startDestination = "episodes",
-        modifier = modifier
+        modifier = modifier,
     ) {
         composable("episodes") {
             EpisodesScreen(
                 modifier = Modifier,
                 onEpisodeClick = { episodeId: String ->
-                    navController.navigate("episodeDetail/$episodeId")
-                }
+                    // navController.navigate("episodeDetail/$episodeId")
+                },
             )
         }
     }
 }
-

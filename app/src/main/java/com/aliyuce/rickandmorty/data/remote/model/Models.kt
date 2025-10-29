@@ -14,7 +14,7 @@ data class Info(
 @Serializable
 data class EpisodeResponse(
     val info: Info,
-    val results: List<Episode>
+    val results: List<Episode>,
 )
 
 @Serializable
@@ -23,7 +23,7 @@ data class Episode(
     val name: String,
     @SerialName("air_date") val airDate: String,
     val episode: String,
-    val characters: List<String>
+    val characters: List<String>,
 )
 
 @Serializable
@@ -34,12 +34,11 @@ data class Character(
     val species: String? = null,
     val image: String? = null,
     val origin: Origin? = null,
-    val episode: List<String> = emptyList()
+    val episode: List<String> = emptyList(),
 )
 
 @Serializable
 data class Origin(
     val name: String,
-    val url: String? = null
+    val url: String? = null,
 )
-
