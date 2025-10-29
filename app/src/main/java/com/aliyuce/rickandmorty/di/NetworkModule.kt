@@ -1,5 +1,6 @@
-package com.aliyuce.rickandmorty.data.remote
+package com.aliyuce.rickandmorty.di
 
+import com.aliyuce.rickandmorty.data.remote.RickAndMortyApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -29,4 +30,3 @@ object NetworkModule {
 
     val api: RickAndMortyApi = retrofit.create(RickAndMortyApi::class.java)
 }
-

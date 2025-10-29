@@ -1,5 +1,8 @@
 package com.aliyuce.rickandmorty.data.remote
 
+import com.aliyuce.rickandmorty.data.remote.model.Character
+import com.aliyuce.rickandmorty.data.remote.model.Episode
+import com.aliyuce.rickandmorty.data.remote.model.EpisodeResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
