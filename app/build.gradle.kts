@@ -115,5 +115,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    detektPlugins("io.nlopez.compose.rules:detekt:0.4.27")
+    detektPlugins(libs.plugins.detektCompose.get().toString())
 }
