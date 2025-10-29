@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,9 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.aliyuce.rickandmorty.R
 import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
@@ -39,10 +45,11 @@ fun EpisodesScreen(
         modifier = modifier,
         uiState = uiState,
         onEpisodeClick = onEpisodeClick,
-        onLoadMore = { nextPage -> viewModel.loadEpisodes(nextPage) }
+        onLoadMore = { nextPage -> viewModel.loadEpisodes(nextPage) },
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Episodes(
     modifier: Modifier = Modifier,
@@ -50,14 +57,23 @@ private fun Episodes(
     onEpisodeClick: (String) -> Unit = {},
     onLoadMore: (Int) -> Unit = {},
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(R.string.episodes_title)) },
+                scrollBehavior = scrollBehavior,
+            )
+        },
         modifier = modifier,
         content = { paddingValues ->
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
             ) {
                 when (val state = uiState) {
                     is EpisodesUiState.Loading -> CircularProgressIndicator()
@@ -67,9 +83,10 @@ private fun Episodes(
                             onRetry = {
                                 onLoadMore(1)
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
                         )
                     }
 
@@ -77,19 +94,22 @@ private fun Episodes(
                         val listState = rememberLazyListState()
                         // Determine if we should load more items based on the scroll position
                         // Trigger when we see the last 3 items
-                        val shouldLoadMore = remember {
-                            derivedStateOf {
-                                val lastVisible =
-                                    listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                                val totalItems = listState.layoutInfo.totalItemsCount
-                                totalItems > 0 && lastVisible >= totalItems - 3
+                        val shouldLoadMore =
+                            remember {
+                                derivedStateOf {
+                                    val lastVisible =
+                                        listState.layoutInfo.visibleItemsInfo
+                                            .lastOrNull()
+                                            ?.index ?: 0
+                                    val totalItems = listState.layoutInfo.totalItemsCount
+                                    totalItems > 0 && lastVisible >= totalItems - 3
+                                }
                             }
-                        }
                         LaunchedEffect(
                             shouldLoadMore.value,
                             state.isLoadingMore,
                             state.page,
-                            state.totalPages
+                            state.totalPages,
                         ) {
                             if (shouldLoadMore.value && !state.isLoadingMore && state.page < state.totalPages) {
                                 onLoadMore(state.page + 1)
@@ -100,20 +120,22 @@ private fun Episodes(
                             items(state.episodes) { episode ->
                                 Text(
                                     text = episode.name,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clickable { onEpisodeClick(episode.id.toString()) }
-                                        .padding(16.dp)
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .clickable { onEpisodeClick(episode.id.toString()) }
+                                            .padding(16.dp),
                                 )
                             }
 
                             if (state.isLoadingMore) {
                                 item {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .padding(16.dp),
+                                        contentAlignment = Alignment.Center,
                                     ) {
                                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                     }
@@ -127,9 +149,10 @@ private fun Episodes(
                                         onRetry = {
                                             onLoadMore(state.page + 1)
                                         },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp)
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
                                     )
                                 }
                             }
@@ -137,7 +160,7 @@ private fun Episodes(
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -146,7 +169,7 @@ private fun Episodes(
     device = "spec:width=411dp,height=891dp",
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showSystemUi = true,
-    showBackground = true
+    showBackground = true,
 )
 @Composable
 private fun EpisodesPreview() {
@@ -164,7 +187,7 @@ private fun EpisodesPreview() {
     device = "spec:width=411dp,height=891dp",
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showSystemUi = true,
-    showBackground = true
+    showBackground = true,
 )
 @Composable
 private fun EpisodesDarkPreview() {

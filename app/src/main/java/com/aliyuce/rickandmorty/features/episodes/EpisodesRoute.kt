@@ -9,13 +9,11 @@ object EpisodesRoute {
     const val ROUTE = "episodes_route"
 }
 
-fun NavGraphBuilder.episodesRoute(
-    onEpisodeClick: (String) -> Unit = {}
-) {
+fun NavGraphBuilder.episodesRoute(onEpisodeClick: (String) -> Unit = {}) {
     composable(route = EpisodesRoute.ROUTE) {
         EpisodesScreen(
             modifier = Modifier,
-            onEpisodeClick = onEpisodeClick
+            onEpisodeClick = onEpisodeClick,
         )
     }
 }

@@ -20,7 +20,7 @@ fun AppNavHost(
         episodesRoute(
             onEpisodeClick = { episodeId ->
                 // Handle episode click navigation here
-            }
+            },
         )
     }
 }

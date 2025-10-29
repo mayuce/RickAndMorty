@@ -11,7 +11,5 @@ import javax.inject.Singleton
 abstract class DataModule {
     @Binds
     @Singleton
-    abstract fun bindEpisodesRepository(
-        impl: RMRepositoryImpl
-    ): RMRepository
+    abstract fun bindEpisodesRepository(impl: RMRepositoryImpl): RMRepository
 }

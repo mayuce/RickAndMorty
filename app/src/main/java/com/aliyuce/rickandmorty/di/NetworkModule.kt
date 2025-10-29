@@ -31,24 +31,30 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BODY
-            } else {
-                HttpLoggingInterceptor.Level.NONE
-            }
+            level =
+                if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BODY
+                } else {
+                    HttpLoggingInterceptor.Level.NONE
+                }
         }
 
     @Provides
     @Singleton
     fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
-        OkHttpClient.Builder()
+        OkHttpClient
+            .Builder()
             .addInterceptor(loggingInterceptor)
             .build()
 
     @Provides
     @Singleton
-    fun provideRetrofit(moshi: Moshi, client: OkHttpClient): Retrofit =
-        Retrofit.Builder()
+    fun provideRetrofit(
+        moshi: Moshi,
+        client: OkHttpClient,
+    ): Retrofit =
+        Retrofit
+            .Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(client)
@@ -56,6 +62,5 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRickAndMortyApi(retrofit: Retrofit): RMApiService =
-        retrofit.create(RMApiService::class.java)
+    fun provideRickAndMortyApi(retrofit: Retrofit): RMApiService = retrofit.create(RMApiService::class.java)
 }

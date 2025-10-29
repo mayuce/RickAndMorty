@@ -25,21 +25,21 @@ import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 fun ErrorComp(
     modifier: Modifier = Modifier,
     error: String?,
-    onRetry: (() -> Unit)?
+    onRetry: (() -> Unit)?,
 ) {
     val message = error ?: stringResource(id = R.string.default_error)
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "⚠️",
             fontSize = 48.sp,
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(72.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -49,7 +49,7 @@ fun ErrorComp(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -64,28 +64,28 @@ fun ErrorComp(
 
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
-    showBackground = true
+    showBackground = true,
 )
 @Composable
 private fun ErrorLightPreview() {
     RickAndMortyTheme {
         ErrorComp(
             error = "An error occurred while fetching data.",
-            onRetry = {}
+            onRetry = {},
         )
     }
 }
 
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true
+    showBackground = true,
 )
 @Composable
 private fun ErrorDarkPreview() {
     RickAndMortyTheme {
         ErrorComp(
             error = "An error occurred while fetching data.",
-            onRetry = {}
+            onRetry = {},
         )
     }
 }

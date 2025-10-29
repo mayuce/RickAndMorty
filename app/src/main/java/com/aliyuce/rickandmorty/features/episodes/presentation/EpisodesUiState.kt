@@ -11,7 +11,7 @@ sealed interface EpisodesUiState {
         val totalPages: Int = 1,
         val isRefreshing: Boolean = false,
         val isLoadingMore: Boolean = false,
-        val error: Throwable? = null
+        val error: Throwable? = null,
     ) : EpisodesUiState
 
     data class Error(
