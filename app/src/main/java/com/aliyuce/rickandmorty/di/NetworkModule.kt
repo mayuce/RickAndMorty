@@ -1,7 +1,7 @@
 package com.aliyuce.rickandmorty.di
 
 import com.aliyuce.rickandmorty.BuildConfig
-import com.aliyuce.rickandmorty.data.remote.RickAndMortyApi
+import com.aliyuce.rickandmorty.data.remote.RMApiService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -32,7 +32,7 @@ object NetworkModule {
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BASIC
+                HttpLoggingInterceptor.Level.BODY
             } else {
                 HttpLoggingInterceptor.Level.NONE
             }
@@ -56,6 +56,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRickAndMortyApi(retrofit: Retrofit): RickAndMortyApi =
-        retrofit.create(RickAndMortyApi::class.java)
+    fun provideRickAndMortyApi(retrofit: Retrofit): RMApiService =
+        retrofit.create(RMApiService::class.java)
 }
