@@ -14,31 +14,68 @@ class EpisodesViewModel @Inject constructor(
     private val getEpisodesUseCase: GetEpisodesUseCase,
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<EpisodesUiState> = MutableStateFlow(EpisodesUiState())
+    private val _uiState: MutableStateFlow<EpisodesUiState> =
+        MutableStateFlow(EpisodesUiState.Loading)
     val uiState: StateFlow<EpisodesUiState> = _uiState
+
+    private var isLoading = false
 
     init {
         loadEpisodes()
     }
 
+    /**
+     * Load episodes for a page. If page == 1 -> initial load / refresh.
+     * If page > 1 -> load more (append).
+     */
     fun loadEpisodes(page: Int = 1) {
-        _uiState.value = _uiState.value.copy(isLoading = true)
+        if (isLoading) return
+        isLoading = true
+
+        val currentState = _uiState.value
+
+        if (page == 1 && (currentState !is EpisodesUiState.Success || currentState.episodes.isEmpty())) {
+            _uiState.value = EpisodesUiState.Loading
+        } else if (page == 1 && currentState is EpisodesUiState.Success) {
+            _uiState.value = currentState.copy(isRefreshing = true, error = null)
+        } else if (page > 1 && currentState is EpisodesUiState.Success) {
+            _uiState.value = currentState.copy(isLoadingMore = true, error = null)
+        }
+
         viewModelScope.launch {
             val result = getEpisodesUseCase(page)
             result.onSuccess { response ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    episodes = response.results,
+                val prevEpisodes = when (val state = _uiState.value) {
+                    is EpisodesUiState.Success -> state.episodes
+                    else -> emptyList()
+                }
+
+                val combined = if (page > 1) prevEpisodes + response.results else response.results
+
+                _uiState.value = EpisodesUiState.Success(
+                    episodes = combined,
                     page = page,
                     totalPages = response.info.pages,
+                    isRefreshing = false,
+                    isLoadingMore = false,
                     error = null
                 )
             }.onFailure { throwable ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = throwable.message ?: "Unknown error"
-                )
+                when (val state = _uiState.value) {
+                    is EpisodesUiState.Success -> {
+                        _uiState.value = state.copy(
+                            isRefreshing = false,
+                            isLoadingMore = false,
+                            error = throwable
+                        )
+                    }
+
+                    else -> {
+                        _uiState.value = EpisodesUiState.Error(throwable)
+                    }
+                }
             }
+            isLoading = false
         }
     }
 }
