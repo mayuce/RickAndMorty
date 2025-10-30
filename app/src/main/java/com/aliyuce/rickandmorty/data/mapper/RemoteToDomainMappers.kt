@@ -2,10 +2,10 @@ package com.aliyuce.rickandmorty.data.mapper
 
 import com.aliyuce.rickandmorty.data.remote.model.EpisodeResponse
 import com.aliyuce.rickandmorty.domain.model.EpisodesPage
-import com.aliyuce.rickandmorty.data.remote.model.Episode as RemoteEpisode
-import com.aliyuce.rickandmorty.domain.model.Episode as DomainEpisode
 import com.aliyuce.rickandmorty.data.remote.model.Character as RemoteCharacter
+import com.aliyuce.rickandmorty.data.remote.model.Episode as RemoteEpisode
 import com.aliyuce.rickandmorty.domain.model.Character as DomainCharacter
+import com.aliyuce.rickandmorty.domain.model.Episode as DomainEpisode
 
 fun RemoteEpisode.toDomain(): DomainEpisode =
     DomainEpisode(

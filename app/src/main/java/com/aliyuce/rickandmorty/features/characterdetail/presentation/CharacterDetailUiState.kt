@@ -13,4 +13,3 @@ sealed interface CharacterDetailUiState {
         val throwable: Throwable,
     ) : CharacterDetailUiState
 }
-

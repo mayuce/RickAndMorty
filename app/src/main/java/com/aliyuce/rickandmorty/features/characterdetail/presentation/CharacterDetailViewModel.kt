@@ -21,12 +21,12 @@ class CharacterDetailViewModel
         fun loadCharacter(id: Int) {
             viewModelScope.launch {
                 val result = getCharacterDetailUseCase(id)
-                result.onSuccess { character ->
-                    _uiState.value = CharacterDetailUiState.Success(character = character)
-                }.onFailure { throwable ->
-                    _uiState.value = CharacterDetailUiState.Error(throwable = throwable)
-                }
+                result
+                    .onSuccess { character ->
+                        _uiState.value = CharacterDetailUiState.Success(character = character)
+                    }.onFailure { throwable ->
+                        _uiState.value = CharacterDetailUiState.Error(throwable = throwable)
+                    }
             }
         }
     }
-

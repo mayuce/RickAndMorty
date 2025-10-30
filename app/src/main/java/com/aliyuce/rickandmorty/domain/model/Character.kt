@@ -9,4 +9,3 @@ data class Character(
     val origin: String = "",
     val episode: List<String> = emptyList(),
 )
-

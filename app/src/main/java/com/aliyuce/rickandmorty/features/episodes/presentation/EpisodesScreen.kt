@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,11 +43,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.aliyuce.rickandmorty.R
 import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
-
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 
 @Composable
 fun EpisodesScreen(
@@ -156,8 +155,7 @@ private fun Episodes(
                                                 .fillMaxWidth()
                                                 .clickable {
                                                     openSheetFor = episode.id
-                                                }
-                                                .padding(16.dp),
+                                                }.padding(16.dp),
                                         episode = episode,
                                     )
                                 }
@@ -195,9 +193,10 @@ private fun Episodes(
                                 if (!state.isLoadingMore && state.page >= state.totalPages && state.episodes.isNotEmpty()) {
                                     item {
                                         Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             Text(
@@ -212,7 +211,7 @@ private fun Episodes(
                             PullRefreshIndicator(
                                 refreshing = isRefreshing,
                                 state = pullRefreshState,
-                                modifier = Modifier.align(Alignment.TopCenter)
+                                modifier = Modifier.align(Alignment.TopCenter),
                             )
                         }
                     }
@@ -225,8 +224,7 @@ private fun Episodes(
                         ?.episodes
                         ?.first { it.id == id }
                         ?.characters
-                }
-                ?.let { ids ->
+                }?.let { ids ->
                     CharactersSheet(
                         onDismissRequest = { openSheetFor = null },
                         characterIds = ids,
@@ -234,7 +232,7 @@ private fun Episodes(
                             onCharacterClick(id)
                             openSheetFor = null
                         },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
                     )
                 }
         },
@@ -247,26 +245,27 @@ fun CharactersSheet(
     onDismissRequest: () -> Unit,
     characterIds: List<String>,
     onClickId: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ModalBottomSheet(
         modifier = modifier,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Text(
             stringResource(R.string.characters_sheet_title),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
         LazyColumn {
             items(characterIds, key = { it }) { id ->
                 ListItem(
                     headlineContent = { Text(id) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onClickId(id)
-                        }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onClickId(id)
+                            },
                 )
                 HorizontalDivider()
             }

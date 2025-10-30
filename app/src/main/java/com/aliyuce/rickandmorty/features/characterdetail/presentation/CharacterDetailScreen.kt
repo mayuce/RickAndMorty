@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.CircularProgressIndicator
@@ -74,18 +74,19 @@ fun CharacterDetailScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 Icons.Default.ArrowBackIosNew,
-                                contentDescription = stringResource(R.string.back_content_description)
+                                contentDescription = stringResource(R.string.back_content_description),
                             )
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    scrollBehavior = scrollBehavior
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        ),
+                    scrollBehavior = scrollBehavior,
                 )
-            }
+            },
         ) { innerPadding ->
 
             val listState = rememberLazyListState()
@@ -101,17 +102,19 @@ fun CharacterDetailScreen(
 
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentPadding = innerPadding
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentPadding = innerPadding,
             ) {
                 when (val state = uiState) {
                     is CharacterDetailUiState.Loading -> {
                         item {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize(),
+                                contentAlignment = Alignment.Center,
                             ) {
                                 CircularProgressIndicator()
                             }
@@ -123,9 +126,10 @@ fun CharacterDetailScreen(
                             ErrorComp(
                                 error = state.throwable.message,
                                 onRetry = { viewModel.loadCharacter(characterId) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                             )
                         }
                     }
@@ -135,56 +139,65 @@ fun CharacterDetailScreen(
 
                         item {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(220.dp)
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(220.dp),
                             ) {
                                 AsyncImage(
                                     model = character.image,
                                     contentDescription = character.name,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(220.dp)
-                                        .offset(y = -parallaxOffsetDp)
-                                        .blur(12.dp)
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(220.dp)
+                                            .offset(y = -parallaxOffsetDp)
+                                            .blur(12.dp),
                                 )
 
                                 Box(
-                                    modifier = Modifier
-                                        .matchParentSize()
-                                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.36f))
+                                    modifier =
+                                        Modifier
+                                            .matchParentSize()
+                                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.36f)),
                                 )
 
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(16.dp)
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomStart)
+                                            .padding(16.dp),
                                 ) {
                                     AsyncImage(
                                         model = character.image,
                                         contentDescription = character.name,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .padding(end = 16.dp)
-                                            .clip(CircleShape)
-                                            .size(96.dp)
+                                        modifier =
+                                            Modifier
+                                                .padding(end = 16.dp)
+                                                .clip(CircleShape)
+                                                .size(96.dp),
                                     )
 
                                     Column {
                                         Text(
                                             text = character.name,
-                                            style = MaterialTheme.typography.headlineSmall
+                                            style = MaterialTheme.typography.headlineSmall,
                                         )
                                         Text(
                                             text = "${character.status} • ${character.species}",
-                                            fontSize = 14.sp
+                                            fontSize = 14.sp,
                                         )
-                                        Text(text = stringResource(
-                                            R.string.origin,
-                                            character.origin
-                                        ), fontSize = 12.sp)
+                                        Text(
+                                            text =
+                                                stringResource(
+                                                    R.string.origin,
+                                                    character.origin,
+                                                ),
+                                            fontSize = 12.sp,
+                                        )
                                     }
                                 }
                             }

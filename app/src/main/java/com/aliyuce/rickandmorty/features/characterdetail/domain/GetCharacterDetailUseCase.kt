@@ -11,4 +11,3 @@ class GetCharacterDetailUseCase
     ) {
         suspend operator fun invoke(id: Int): Result<Character> = repository.getCharacter(id = id)
     }
-
