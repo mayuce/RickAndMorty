@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -61,7 +62,20 @@ private fun Episodes(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.episodes_title)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.episodes_title),
+                        style =
+                            MaterialTheme.typography.titleLarge.copy(
+                                color = MaterialTheme.colorScheme.primary,
+                            ),
+                    )
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
                 scrollBehavior = scrollBehavior,
             )
         },
@@ -118,13 +132,15 @@ private fun Episodes(
 
                         LazyColumn(state = listState) {
                             items(state.episodes) { episode ->
-                                Text(
-                                    text = episode.name,
+                                EpisodeItem(
                                     modifier =
                                         Modifier
-                                            .fillMaxSize()
-                                            .clickable { onEpisodeClick(episode.id.toString()) }
-                                            .padding(16.dp),
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                onEpisodeClick(episode.id.toString())
+                                            }.padding(16.dp),
+                                    episode = episode,
+                                    onClick = { onEpisodeClick(episode.id.toString()) },
                                 )
                             }
 
