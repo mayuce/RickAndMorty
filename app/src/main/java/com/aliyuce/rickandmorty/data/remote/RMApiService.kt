@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface RickAndMortyApi {
+interface RMApiService {
     @GET("/api/episode")
     suspend fun getEpisodes(
         @Query("page") page: Int = 1,

@@ -26,6 +26,7 @@ moshiKotlin = "1.15.2"
 retrofit2MoshiConverter = "3.0.0"
 
 [libraries]
+androidx-compose-material = { module = "androidx.compose.material:material" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }

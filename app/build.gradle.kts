@@ -35,17 +35,21 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
         freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
     buildFeatures {
         buildConfig = true
         compose = true
     }
+}
+
+hilt {
+    enableAggregatingTask = false
 }
 
 detekt {
@@ -67,6 +71,7 @@ ktlint {
         exclude { it.file.absolutePath.contains("/generated/") }
         exclude { it.file.absolutePath.contains("/test/") }
         exclude { it.file.absolutePath.contains("/androidTest/") }
+        exclude { it.file.absolutePath.contains("build.gradle.kts") }
     }
 }
 
@@ -79,6 +84,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material)
 
     // Networking
     implementation(libs.retrofit)
