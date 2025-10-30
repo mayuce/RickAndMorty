@@ -71,6 +71,7 @@ ktlint {
         exclude { it.file.absolutePath.contains("/generated/") }
         exclude { it.file.absolutePath.contains("/test/") }
         exclude { it.file.absolutePath.contains("/androidTest/") }
+        exclude { it.file.absolutePath.contains("build.gradle.kts") }
     }
 }
 
