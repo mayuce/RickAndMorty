@@ -11,4 +11,12 @@
     <string name="character_detail_title">Character</string>
     <string name="appears_in">Appears in</string>
     <string name="origin">Origin: %1$s</string>
+
+    <!-- Export strings -->
+    <string name="export_success">Exported file</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="export_no_character">No character to export</string>
+    <string name="export_character_description">Export character</string>
+    <string name="export_open">Open</string>
+    <string name="no_app_to_open">No application available to open the exported file</string>
 </resources>
