@@ -13,7 +13,7 @@ fun NavGraphBuilder.episodesRoute(onEpisodeClick: (String) -> Unit = {}) {
     composable(route = EpisodesRoute.ROUTE) {
         EpisodesScreen(
             modifier = Modifier,
-            onEpisodeClick = onEpisodeClick,
+            onCharacterClick = onEpisodeClick,
         )
     }
 }

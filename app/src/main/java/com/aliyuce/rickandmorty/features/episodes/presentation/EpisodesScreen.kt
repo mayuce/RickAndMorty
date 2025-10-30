@@ -13,7 +13,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,7 +25,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -36,7 +42,7 @@ import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
 @Composable
 fun EpisodesScreen(
-    onEpisodeClick: (String) -> Unit,
+    onCharacterClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EpisodesViewModel = hiltViewModel(),
 ) {
@@ -45,7 +51,7 @@ fun EpisodesScreen(
     Episodes(
         uiState = uiState,
         modifier = modifier,
-        onEpisodeClick = onEpisodeClick,
+        onCharacterClick = onCharacterClick,
         onLoadMore = { nextPage -> viewModel.loadEpisodes(nextPage) },
     )
 }
@@ -55,7 +61,7 @@ fun EpisodesScreen(
 private fun Episodes(
     uiState: EpisodesUiState,
     modifier: Modifier = Modifier,
-    onEpisodeClick: (String) -> Unit = {},
+    onCharacterClick: (String) -> Unit = {},
     onLoadMore: (Int) -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -81,6 +87,7 @@ private fun Episodes(
         },
         modifier = modifier,
         content = { paddingValues ->
+            var openSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
             Box(
                 modifier =
                     Modifier
@@ -137,10 +144,10 @@ private fun Episodes(
                                         Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                onEpisodeClick(episode.id.toString())
-                                            }.padding(16.dp),
+                                                openSheetFor = episode.id
+                                            }
+                                            .padding(16.dp),
                                     episode = episode,
-                                    onClick = { onEpisodeClick(episode.id.toString()) },
                                 )
                             }
 
@@ -176,8 +183,60 @@ private fun Episodes(
                     }
                 }
             }
+            openSheetFor
+                ?.takeIf { uiState is EpisodesUiState.Success }
+                ?.let { id ->
+                    (uiState as? EpisodesUiState.Success)
+                        ?.episodes
+                        ?.first { it.id == id }
+                        ?.characters
+                }
+                ?.let { ids ->
+                    CharactersSheet(
+                        onDismissRequest = { openSheetFor = null },
+                        characterIds = ids,
+                        onClickId = { id ->
+                            onCharacterClick(id)
+                            openSheetFor = null
+                        },
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CharactersSheet(
+    onDismissRequest: () -> Unit,
+    characterIds: List<String>,
+    onClickId: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ModalBottomSheet(
+        modifier = modifier,
+        onDismissRequest = onDismissRequest
+    ) {
+        Text(
+            stringResource(R.string.characters_sheet_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(16.dp)
+        )
+        LazyColumn {
+            items(characterIds, key = { it }) { id ->
+                ListItem(
+                    headlineContent = { Text(id) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onClickId(id)
+                        }
+                )
+                HorizontalDivider()
+            }
+        }
+    }
 }
 
 @Preview(
@@ -193,7 +252,7 @@ private fun EpisodesPreview() {
         Episodes(
             modifier = Modifier.fillMaxSize(),
             uiState = EpisodesUiState.Success(episodes = emptyList()),
-            onEpisodeClick = {},
+            onCharacterClick = {},
         )
     }
 }
@@ -211,7 +270,7 @@ private fun EpisodesDarkPreview() {
         Episodes(
             modifier = Modifier.fillMaxSize(),
             uiState = EpisodesUiState.Loading,
-            onEpisodeClick = {},
+            onCharacterClick = {},
         )
     }
 }

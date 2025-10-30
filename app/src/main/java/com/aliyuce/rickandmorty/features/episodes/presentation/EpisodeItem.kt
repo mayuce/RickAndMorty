@@ -27,7 +27,6 @@ import java.util.Locale
 fun EpisodeItem(
     episode: Episode,
     modifier: Modifier = Modifier,
-    onClick: (String) -> Unit = {},
 ) {
     val formattedDate = formatAirDate(episode.airDate)
 
@@ -75,7 +74,6 @@ private fun EpisodeItemPreview() {
                     airDate = "December 2, 2013",
                     episode = "S01E01",
                 ),
-            onClick = {},
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -100,7 +98,6 @@ private fun EpisodeItemDarkPreview() {
                     airDate = "December 2, 2013",
                     episode = "S01E01",
                 ),
-            onClick = {},
             modifier =
                 Modifier
                     .fillMaxWidth()
