@@ -2,7 +2,12 @@
     <string name="app_name">Rick and Morty</string>
     <string name="default_error">Something went wrong. Please try again later.</string>
     <string name="retry">Retry</string>
+    <string name="back_content_description">Back</string>
     <string name="episodes_title">Episodes</string>
     <string name="characters_sheet_title">Characters</string>
     <string name="end_of_list">End of the episodes</string>
+
+    <!-- Character detail -->
+    <string name="character_detail_title">Character</string>
+    <string name="appears_in">Appears in</string>
 </resources>

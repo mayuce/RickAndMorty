@@ -85,6 +85,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material)
+    // Material icons (extended) — BOM provides the version
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Networking
     implementation(libs.retrofit)
