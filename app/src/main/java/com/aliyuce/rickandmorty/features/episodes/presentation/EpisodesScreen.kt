@@ -36,15 +36,15 @@ import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
 @Composable
 fun EpisodesScreen(
+    onEpisodeClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onEpisodeClick: (String) -> Unit = {},
+    viewModel: EpisodesViewModel = hiltViewModel(),
 ) {
-    val viewModel: EpisodesViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     Episodes(
-        modifier = modifier,
         uiState = uiState,
+        modifier = modifier,
         onEpisodeClick = onEpisodeClick,
         onLoadMore = { nextPage -> viewModel.loadEpisodes(nextPage) },
     )
@@ -53,8 +53,8 @@ fun EpisodesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Episodes(
-    modifier: Modifier = Modifier,
     uiState: EpisodesUiState,
+    modifier: Modifier = Modifier,
     onEpisodeClick: (String) -> Unit = {},
     onLoadMore: (Int) -> Unit = {},
 ) {

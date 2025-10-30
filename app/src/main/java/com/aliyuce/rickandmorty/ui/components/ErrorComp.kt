@@ -23,8 +23,8 @@ import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
 @Composable
 fun ErrorComp(
-    modifier: Modifier = Modifier,
     error: String?,
+    modifier: Modifier = Modifier,
     onRetry: (() -> Unit)?,
 ) {
     val message = error ?: stringResource(id = R.string.default_error)
