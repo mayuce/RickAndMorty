@@ -40,6 +40,11 @@ import com.aliyuce.rickandmorty.R
 import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
 
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.ExperimentalMaterialApi
+
 @Composable
 fun EpisodesScreen(
     onCharacterClick: (String) -> Unit,
@@ -56,7 +61,7 @@ fun EpisodesScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun Episodes(
     uiState: EpisodesUiState,
@@ -112,6 +117,10 @@ private fun Episodes(
                     }
 
                     is EpisodesUiState.Success -> {
+                        // Material pull-to-refresh state uses Success state's isRefreshing
+                        val isRefreshing = state.isRefreshing
+                        val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = { onLoadMore(1) })
+
                         val listState = rememberLazyListState()
                         // Determine if we should load more items based on the scroll position
                         // Trigger when we see the last 3 items
@@ -137,48 +146,74 @@ private fun Episodes(
                             }
                         }
 
-                        LazyColumn(state = listState) {
-                            items(state.episodes) { episode ->
-                                EpisodeItem(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                openSheetFor = episode.id
-                                            }
-                                            .padding(16.dp),
-                                    episode = episode,
-                                )
-                            }
-
-                            if (state.isLoadingMore) {
-                                item {
-                                    Box(
+                        // Apply pullRefresh modifier to the container so the list supports pull-to-refresh
+                        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                            LazyColumn(state = listState) {
+                                items(state.episodes) { episode ->
+                                    EpisodeItem(
                                         modifier =
                                             Modifier
-                                                .fillMaxSize()
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    openSheetFor = episode.id
+                                                }
                                                 .padding(16.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                        episode = episode,
+                                    )
+                                }
+
+                                if (state.isLoadingMore) {
+                                    item {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .padding(16.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                        }
+                                    }
+                                }
+
+                                state.error?.let {
+                                    item {
+                                        ErrorComp(
+                                            error = it.message,
+                                            onRetry = {
+                                                onLoadMore(state.page + 1)
+                                            },
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                        )
+                                    }
+                                }
+
+                                // End-of-list message when we've reached the last page
+                                if (!state.isLoadingMore && state.page >= state.totalPages && state.episodes.isNotEmpty()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.end_of_list),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                            )
+                                        }
                                     }
                                 }
                             }
 
-                            state.error?.let {
-                                item {
-                                    ErrorComp(
-                                        error = it.message,
-                                        onRetry = {
-                                            onLoadMore(state.page + 1)
-                                        },
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                    )
-                                }
-                            }
+                            PullRefreshIndicator(
+                                refreshing = isRefreshing,
+                                state = pullRefreshState,
+                                modifier = Modifier.align(Alignment.TopCenter)
+                            )
                         }
                     }
                 }

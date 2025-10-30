@@ -4,4 +4,5 @@
     <string name="retry">Retry</string>
     <string name="episodes_title">Episodes</string>
     <string name="characters_sheet_title">Characters</string>
+    <string name="end_of_list">End of the episodes</string>
 </resources>
