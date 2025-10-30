@@ -10,4 +10,5 @@
     <!-- Character detail -->
     <string name="character_detail_title">Character</string>
     <string name="appears_in">Appears in</string>
+    <string name="origin">Origin: %1$s</string>
 </resources>
