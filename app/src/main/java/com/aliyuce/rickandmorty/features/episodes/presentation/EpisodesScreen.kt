@@ -64,9 +64,9 @@ fun EpisodesScreen(
 @Composable
 private fun Episodes(
     uiState: EpisodesUiState,
+    onCharacterClick: (String) -> Unit,
+    onLoadMore: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    onCharacterClick: (String) -> Unit = {},
-    onLoadMore: (Int) -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -116,104 +116,11 @@ private fun Episodes(
                     }
 
                     is EpisodesUiState.Success -> {
-                        // Material pull-to-refresh state uses Success state's isRefreshing
-                        val isRefreshing = state.isRefreshing
-                        val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = { onLoadMore(1) })
-
-                        val listState = rememberLazyListState()
-                        // Determine if we should load more items based on the scroll position
-                        // Trigger when we see the last 3 items
-                        val shouldLoadMore =
-                            remember {
-                                derivedStateOf {
-                                    val lastVisible =
-                                        listState.layoutInfo.visibleItemsInfo
-                                            .lastOrNull()
-                                            ?.index ?: 0
-                                    val totalItems = listState.layoutInfo.totalItemsCount
-                                    totalItems > 0 && lastVisible >= totalItems - 3
-                                }
-                            }
-                        LaunchedEffect(
-                            shouldLoadMore.value,
-                            state.isLoadingMore,
-                            state.page,
-                            state.totalPages,
-                        ) {
-                            if (shouldLoadMore.value && !state.isLoadingMore && state.page < state.totalPages) {
-                                onLoadMore(state.page + 1)
-                            }
-                        }
-
-                        // Apply pullRefresh modifier to the container so the list supports pull-to-refresh
-                        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                            LazyColumn(state = listState) {
-                                items(state.episodes) { episode ->
-                                    EpisodeItem(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    openSheetFor = episode.id
-                                                }.padding(16.dp),
-                                        episode = episode,
-                                    )
-                                }
-
-                                if (state.isLoadingMore) {
-                                    item {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .padding(16.dp),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                        }
-                                    }
-                                }
-
-                                state.error?.let {
-                                    item {
-                                        ErrorComp(
-                                            error = it.message,
-                                            onRetry = {
-                                                onLoadMore(state.page + 1)
-                                            },
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                        )
-                                    }
-                                }
-
-                                // End-of-list message when we've reached the last page
-                                if (!state.isLoadingMore && state.page >= state.totalPages && state.episodes.isNotEmpty()) {
-                                    item {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.end_of_list),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            PullRefreshIndicator(
-                                refreshing = isRefreshing,
-                                state = pullRefreshState,
-                                modifier = Modifier.align(Alignment.TopCenter),
-                            )
-                        }
+                        EpisodesSuccessContent(
+                            state = state,
+                            onLoadMore = onLoadMore,
+                            onOpenSheetFor = { openSheetFor = it },
+                        )
                     }
                 }
             }
@@ -239,6 +146,116 @@ private fun Episodes(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun EpisodesSuccessContent(
+    state: EpisodesUiState.Success,
+    onLoadMore: (Int) -> Unit,
+    onOpenSheetFor: (Int) -> Unit,
+) {
+    val isRefreshing = state.isRefreshing
+    val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = { onLoadMore(1) })
+
+    val listState = rememberLazyListState()
+    // Determine if we should load more items based on the scroll position
+    // Trigger when we see the last 3 items
+    val shouldLoadMore =
+        remember {
+            derivedStateOf {
+                val lastVisible =
+                    listState.layoutInfo.visibleItemsInfo
+                        .lastOrNull()
+                        ?.index ?: 0
+                val totalItems = listState.layoutInfo.totalItemsCount
+                totalItems > 0 && lastVisible >= totalItems - 3
+            }
+        }
+    LaunchedEffect(
+        shouldLoadMore.value,
+        state.isLoadingMore,
+        state.page,
+        state.totalPages,
+    ) {
+        if (shouldLoadMore.value && !state.isLoadingMore && state.page < state.totalPages) {
+            onLoadMore(state.page + 1)
+        }
+    }
+
+    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+        LazyColumn(state = listState) {
+            items(state.episodes) { episode ->
+                EpisodeItem(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onOpenSheetFor(episode.id)
+                            }.padding(16.dp),
+                    episode = episode,
+                )
+            }
+
+            if (state.isLoadingMore) {
+                item {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                }
+            }
+
+            state.error?.let {
+                item {
+                    ErrorComp(
+                        error = it.message,
+                        onRetry = {
+                            onLoadMore(state.page + 1)
+                        },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                    )
+                }
+            }
+
+            // End-of-list message when we've reached the last page
+            if (
+                !state.isLoadingMore &&
+                state.page >= state.totalPages &&
+                state.episodes.isNotEmpty()
+            ) {
+                item {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.end_of_list),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
+        }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
+    }
+}
+
+@Suppress("UnstableCollections")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharactersSheet(
@@ -287,6 +304,7 @@ private fun EpisodesPreview() {
             modifier = Modifier.fillMaxSize(),
             uiState = EpisodesUiState.Success(episodes = emptyList()),
             onCharacterClick = {},
+            onLoadMore = {},
         )
     }
 }
@@ -305,6 +323,7 @@ private fun EpisodesDarkPreview() {
             modifier = Modifier.fillMaxSize(),
             uiState = EpisodesUiState.Loading,
             onCharacterClick = {},
+            onLoadMore = {},
         )
     }
 }

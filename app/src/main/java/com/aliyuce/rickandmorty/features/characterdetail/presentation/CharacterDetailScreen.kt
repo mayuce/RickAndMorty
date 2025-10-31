@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -62,9 +63,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailScreen(
-    modifier: Modifier = Modifier,
     characterId: Int,
-    onBack: () -> Unit = {},
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: CharacterDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -87,223 +88,278 @@ fun CharacterDetailScreen(
         val exportOpenLabel = stringResource(R.string.export_open)
         val noAppToOpenText = stringResource(R.string.no_app_to_open)
 
-        val createDocumentLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.CreateDocument("text/plain")
-        ) { uri ->
-            if (uri != null) {
-                try {
-                    val text = when (val state = uiState) {
-                        is CharacterDetailUiState.Success -> {
-                            val c = state.character
-                            "Name: ${c.name}\nStatus: ${c.status}\nSpecies: ${c.species}\nOrigin: ${c.origin}\nTotal episodes: ${c.episode.size}\n"
-                        }
-
-                        else -> "No character data"
-                    }
-
-                    context.contentResolver.openOutputStream(uri)
-                        ?.use { it.write(text.toByteArray()) }
-
-                    scope.launch {
-                        val result = snackbarHostState.showSnackbar(exportSuccessText, exportOpenLabel)
-                        if (result == ActionPerformed) {
-                            try {
-                                val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(uri, context.contentResolver.getType(uri))
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val createDocumentLauncher =
+            rememberLauncherForActivityResult(
+                ActivityResultContracts.CreateDocument("text/plain"),
+            ) { uri ->
+                if (uri != null) {
+                    try {
+                        val text =
+                            when (val state = uiState) {
+                                is CharacterDetailUiState.Success -> {
+                                    val c = state.character
+                                    "" +
+                                        "Name: ${c.name}\n" +
+                                        "Status: ${c.status}\n" +
+                                        "Species: ${c.species}\n" +
+                                        "Origin: ${c.origin}\n" +
+                                        "Total episodes: ${c.episode.size}\n" +
+                                        ""
                                 }
-                                context.startActivity(openIntent)
-                            } catch (e: ActivityNotFoundException) {
-                                snackbarHostState.showSnackbar(noAppToOpenText)
+
+                                else -> "No character data"
+                            }
+
+                        context.contentResolver
+                            .openOutputStream(uri)
+                            ?.use { it.write(text.toByteArray()) }
+
+                        scope.launch {
+                            val result =
+                                snackbarHostState.showSnackbar(exportSuccessText, exportOpenLabel)
+                            if (result == ActionPerformed) {
+                                try {
+                                    val openIntent =
+                                        Intent(Intent.ACTION_VIEW).apply {
+                                            setDataAndType(
+                                                uri,
+                                                context.contentResolver.getType(uri),
+                                            )
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                    context.startActivity(openIntent)
+                                } catch (e: ActivityNotFoundException) {
+                                    e.printStackTrace()
+                                    snackbarHostState.showSnackbar(noAppToOpenText)
+                                }
                             }
                         }
+                    } catch (e: Exception) {
+                        val msg = e.message ?: ""
+                        val formatted = String.format(exportFailedTemplate, msg)
+                        scope.launch { snackbarHostState.showSnackbar(formatted) }
                     }
-                } catch (e: Exception) {
-                    val msg = e.message ?: ""
-                    val formatted = String.format(exportFailedTemplate, msg)
-                    scope.launch { snackbarHostState.showSnackbar(formatted) }
                 }
             }
-        }
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
-                LargeTopAppBar(
-                    title = { Text(text = stringResource(R.string.character_detail_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.Default.ArrowBackIosNew,
-                                contentDescription = stringResource(R.string.back_content_description),
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            if (uiState is CharacterDetailUiState.Success) {
-                                val name =
-                                    (uiState as CharacterDetailUiState.Success).character.name
-                                        .replace(Regex("[^A-Za-z0-9_.-]"), "_")
-                                createDocumentLauncher.launch("$name.txt")
-                            } else {
-                                scope.launch { snackbarHostState.showSnackbar(exportNoCharacterText) }
-                            }
-                        }) {
-                            Icon(
-                                Icons.Default.Share,
-                                contentDescription = exportCharacterDescription
-                            )
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        ),
-                    scrollBehavior = scrollBehavior,
+                CharacterDetailTopBar(
+                    onBack = onBack,
+                    uiState = uiState,
+                    createDocumentLauncher = createDocumentLauncher,
+                    snackbarHostState = snackbarHostState,
+                    snackbarScope = scope,
+                    exportNoCharacterText = exportNoCharacterText,
+                    exportCharacterDescription = exportCharacterDescription,
                 )
             },
         ) { innerPadding ->
 
-            val listState = rememberLazyListState()
+            CharacterDetailContent(
+                innerPadding = innerPadding,
+                listState = rememberLazyListState(),
+                uiState = uiState,
+                parallaxProvider = @Composable {
+                    val firstOffsetPx by remember {
+                        derivedStateOf {
+                            if (it.firstVisibleItemIndex == 0) it.firstVisibleItemScrollOffset else 0
+                        }
+                    }
+                    val density = LocalDensity.current
+                    with(density) { (firstOffsetPx / 2f).toDp() }
+                },
+                onRetry = { viewModel.loadCharacter(characterId) },
+            )
+        }
+    }
+}
 
-            val firstOffsetPx by remember {
-                derivedStateOf {
-                    if (listState.firstVisibleItemIndex == 0) listState.firstVisibleItemScrollOffset else 0
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CharacterDetailTopBar(
+    onBack: () -> Unit,
+    uiState: CharacterDetailUiState,
+    createDocumentLauncher: androidx.activity.result.ActivityResultLauncher<String>,
+    snackbarHostState: SnackbarHostState,
+    snackbarScope: kotlinx.coroutines.CoroutineScope,
+    exportNoCharacterText: String,
+    exportCharacterDescription: String,
+) {
+    LargeTopAppBar(
+        title = { Text(text = stringResource(R.string.character_detail_title)) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.Default.ArrowBackIosNew,
+                    contentDescription = stringResource(R.string.back_content_description),
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = {
+                if (uiState is CharacterDetailUiState.Success) {
+                    val name =
+                        (uiState as CharacterDetailUiState.Success)
+                            .character.name
+                            .replace(Regex("[^A-Za-z0-9_.-]"), "_")
+                    createDocumentLauncher.launch("$name.txt")
+                } else {
+                    snackbarScope.launch { snackbarHostState.showSnackbar(exportNoCharacterText) }
+                }
+            }) {
+                Icon(
+                    Icons.Default.Share,
+                    contentDescription = exportCharacterDescription,
+                )
+            }
+        },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
+    scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+    )
+}
+
+@Composable
+private fun CharacterDetailContent(
+    innerPadding: PaddingValues,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    uiState: CharacterDetailUiState,
+    parallaxProvider: @Composable (androidx.compose.foundation.lazy.LazyListState) -> Dp,
+    onRetry: () -> Unit,
+) {
+    val parallaxOffsetDp = parallaxProvider(listState)
+
+    LazyColumn(
+        state = listState,
+        modifier =
+            Modifier
+                .fillMaxSize(),
+        contentPadding = innerPadding,
+    ) {
+        when (val state = uiState) {
+            is CharacterDetailUiState.Loading -> {
+                item {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
 
-            val density = LocalDensity.current
-            val parallaxOffsetDp: Dp = with(density) { (firstOffsetPx / 2f).toDp() }
+            is CharacterDetailUiState.Error -> {
+                item {
+                    ErrorComp(
+                        error = state.throwable.message,
+                        onRetry = onRetry,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                    )
+                }
+            }
 
-            LazyColumn(
-                state = listState,
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
-                contentPadding = innerPadding,
-            ) {
-                when (val state = uiState) {
-                    is CharacterDetailUiState.Loading -> {
-                        item {
-                            Box(
+            is CharacterDetailUiState.Success -> {
+                val character = state.character
+
+                item {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(220.dp),
+                    ) {
+                        AsyncImage(
+                            model = character.image,
+                            contentDescription = character.name,
+                            contentScale = ContentScale.Crop,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(220.dp)
+                                    .offset(y = -parallaxOffsetDp)
+                                    .blur(12.dp),
+                        )
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .matchParentSize()
+                                    .background(
+                                        MaterialTheme.colorScheme.background.copy(
+                                            alpha = 0.36f,
+                                        ),
+                                    ),
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(16.dp),
+                        ) {
+                            AsyncImage(
+                                model = character.image,
+                                contentDescription = character.name,
+                                contentScale = ContentScale.Crop,
                                 modifier =
                                     Modifier
-                                        .fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-
-                    is CharacterDetailUiState.Error -> {
-                        item {
-                            ErrorComp(
-                                error = state.throwable.message,
-                                onRetry = { viewModel.loadCharacter(characterId) },
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
+                                        .padding(end = 16.dp)
+                                        .clip(CircleShape)
+                                        .size(96.dp),
                             )
-                        }
-                    }
 
-                    is CharacterDetailUiState.Success -> {
-                        val character = state.character
-
-                        item {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(220.dp),
-                            ) {
-                                AsyncImage(
-                                    model = character.image,
-                                    contentDescription = character.name,
-                                    contentScale = ContentScale.Crop,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .height(220.dp)
-                                            .offset(y = -parallaxOffsetDp)
-                                            .blur(12.dp),
+                            Column {
+                                Text(
+                                    text = character.name,
+                                    style = MaterialTheme.typography.headlineSmall,
                                 )
-
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .matchParentSize()
-                                            .background(
-                                                MaterialTheme.colorScheme.background.copy(
-                                                    alpha = 0.36f
-                                                )
-                                            ),
+                                Text(
+                                    text = "${character.status} • ${character.species}",
+                                    fontSize = 14.sp,
                                 )
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.BottomStart)
-                                            .padding(16.dp),
-                                ) {
-                                    AsyncImage(
-                                        model = character.image,
-                                        contentDescription = character.name,
-                                        contentScale = ContentScale.Crop,
-                                        modifier =
-                                            Modifier
-                                                .padding(end = 16.dp)
-                                                .clip(CircleShape)
-                                                .size(96.dp),
-                                    )
-
-                                    Column {
-                                        Text(
-                                            text = character.name,
-                                            style = MaterialTheme.typography.headlineSmall,
-                                        )
-                                        Text(
-                                            text = "${character.status} • ${character.species}",
-                                            fontSize = 14.sp,
-                                        )
-                                        Text(
-                                            text =
-                                                stringResource(
-                                                    R.string.origin,
-                                                    character.origin,
-                                                ),
-                                            fontSize = 12.sp,
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.origin,
+                                            character.origin,
+                                        ),
+                                    fontSize = 12.sp,
+                                )
                             }
                         }
-
-                        item {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = stringResource(R.string.appears_in))
-                            }
-                        }
-
-                        items(character.episode) { ep ->
-                            Text(
-                                text = ep,
-                                modifier = Modifier.padding(
-                                    start = 16.dp,
-                                    end = 16.dp,
-                                    top = 4.dp,
-                                    bottom = 4.dp
-                                )
-                            )
-                        }
                     }
+                }
+
+                item {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = stringResource(R.string.appears_in))
+                    }
+                }
+
+                items(character.episode) { ep ->
+                    Text(
+                        text = ep,
+                        modifier =
+                            Modifier.padding(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 4.dp,
+                                bottom = 4.dp,
+                            ),
+                    )
                 }
             }
         }

@@ -15,7 +15,8 @@ class CharacterDetailViewModel
     constructor(
         private val getCharacterDetailUseCase: GetCharacterDetailUseCase,
     ) : ViewModel() {
-        private val _uiState: MutableStateFlow<CharacterDetailUiState> = MutableStateFlow(CharacterDetailUiState.Loading)
+        private val _uiState: MutableStateFlow<CharacterDetailUiState> =
+            MutableStateFlow(CharacterDetailUiState.Loading)
         val uiState: StateFlow<CharacterDetailUiState> = _uiState
 
         fun loadCharacter(id: Int) {
@@ -30,4 +31,3 @@ class CharacterDetailViewModel
             }
         }
     }
-
