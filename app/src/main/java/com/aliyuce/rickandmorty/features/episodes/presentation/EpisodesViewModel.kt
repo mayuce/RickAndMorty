@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aliyuce.rickandmorty.domain.model.Episode
 import com.aliyuce.rickandmorty.domain.model.EpisodesPage
+import com.aliyuce.rickandmorty.features.episodes.domain.GetEpisodesLastRefreshedUseCase
 import com.aliyuce.rickandmorty.features.episodes.domain.GetEpisodesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ class EpisodesViewModel
     @Inject
     constructor(
         private val getEpisodesUseCase: GetEpisodesUseCase,
+        private val getEpisodesLastRefreshedUseCase: GetEpisodesLastRefreshedUseCase,
     ) : ViewModel() {
         private val _uiState: MutableStateFlow<EpisodesUiState> =
             MutableStateFlow(EpisodesUiState.Loading)
@@ -31,6 +33,7 @@ class EpisodesViewModel
          * Load episodes for a page. If page == 1 -> initial load / refresh.
          * If page > 1 -> load more (append).
          */
+        @Suppress("CyclomaticComplexMethod")
         fun loadEpisodes(page: Int = 1) {
             if (isLoading) return
             isLoading = true
@@ -57,6 +60,14 @@ class EpisodesViewModel
 
                         val combined = if (page > 1) prevEpisodes + response.results else response.results
 
+                        val lastRefreshed =
+                            try {
+                                getEpisodesLastRefreshedUseCase(page)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                null
+                            }
+
                         _uiState.value =
                             EpisodesUiState.Success(
                                 episodes = combined,
@@ -65,6 +76,7 @@ class EpisodesViewModel
                                 isRefreshing = false,
                                 isLoadingMore = false,
                                 error = null,
+                                lastRefreshed = lastRefreshed,
                             )
                     }.onFailure { throwable ->
                         when (val state = _uiState.value) {

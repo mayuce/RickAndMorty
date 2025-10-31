@@ -7,6 +7,7 @@ sealed interface CharacterDetailUiState {
 
     data class Success(
         val character: Character,
+        val lastRefreshed: Long? = null,
     ) : CharacterDetailUiState
 
     data class Error(

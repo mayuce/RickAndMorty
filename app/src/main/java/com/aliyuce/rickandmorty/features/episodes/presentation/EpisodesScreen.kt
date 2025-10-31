@@ -43,6 +43,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.aliyuce.rickandmorty.R
 import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import com.aliyuce.rickandmorty.ui.theme.RickAndMortyTheme
+import java.text.DateFormat
+import java.util.Date
 
 @Composable
 fun EpisodesScreen(
@@ -120,6 +122,7 @@ private fun Episodes(
                             state = state,
                             onLoadMore = onLoadMore,
                             onOpenSheetFor = { openSheetFor = it },
+                            lastRefreshed = state.lastRefreshed,
                         )
                     }
                 }
@@ -146,12 +149,18 @@ private fun Episodes(
     )
 }
 
+private fun formatTimestamp(epochMillis: Long): String {
+    val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG)
+    return df.format(Date(epochMillis))
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun EpisodesSuccessContent(
     state: EpisodesUiState.Success,
     onLoadMore: (Int) -> Unit,
     onOpenSheetFor: (Int) -> Unit,
+    lastRefreshed: Long?,
 ) {
     val isRefreshing = state.isRefreshing
     val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = { onLoadMore(1) })
@@ -183,6 +192,19 @@ private fun EpisodesSuccessContent(
 
     Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(state = listState) {
+            if (lastRefreshed != null) {
+                item {
+                    Text(
+                        text = stringResource(R.string.last_refreshed_template, formatTimestamp(lastRefreshed)),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+            }
+
             items(state.episodes) { episode ->
                 EpisodeItem(
                     modifier =

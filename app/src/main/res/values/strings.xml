@@ -19,4 +19,7 @@
     <string name="export_character_description">Export character</string>
     <string name="export_open">Open</string>
     <string name="no_app_to_open">No application available to open the exported file</string>
+
+    <!-- Timestamp -->
+    <string name="last_refreshed_template">Last refreshed: %1$s</string>
 </resources>
