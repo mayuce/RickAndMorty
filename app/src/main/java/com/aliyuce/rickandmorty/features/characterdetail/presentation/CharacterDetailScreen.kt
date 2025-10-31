@@ -3,6 +3,7 @@ package com.aliyuce.rickandmorty.features.characterdetail.presentation
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.material3.SnackbarResult.ActionPerformed
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -154,6 +156,7 @@ fun CharacterDetailScreen(
                     snackbarScope = scope,
                     exportNoCharacterText = exportNoCharacterText,
                     exportCharacterDescription = exportCharacterDescription,
+                    scrollBehavior = scrollBehavior,
                 )
             },
         ) { innerPadding ->
@@ -162,15 +165,6 @@ fun CharacterDetailScreen(
                 innerPadding = innerPadding,
                 listState = rememberLazyListState(),
                 uiState = uiState,
-                parallaxProvider = @Composable {
-                    val firstOffsetPx by remember {
-                        derivedStateOf {
-                            if (it.firstVisibleItemIndex == 0) it.firstVisibleItemScrollOffset else 0
-                        }
-                    }
-                    val density = LocalDensity.current
-                    with(density) { (firstOffsetPx / 2f).toDp() }
-                },
                 onRetry = { viewModel.loadCharacter(characterId) },
             )
         }
@@ -182,11 +176,12 @@ fun CharacterDetailScreen(
 private fun CharacterDetailTopBar(
     onBack: () -> Unit,
     uiState: CharacterDetailUiState,
-    createDocumentLauncher: androidx.activity.result.ActivityResultLauncher<String>,
+    createDocumentLauncher: ActivityResultLauncher<String>,
     snackbarHostState: SnackbarHostState,
     snackbarScope: kotlinx.coroutines.CoroutineScope,
     exportNoCharacterText: String,
     exportCharacterDescription: String,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     LargeTopAppBar(
         title = { Text(text = stringResource(R.string.character_detail_title)) },
@@ -201,10 +196,7 @@ private fun CharacterDetailTopBar(
         actions = {
             IconButton(onClick = {
                 if (uiState is CharacterDetailUiState.Success) {
-                    val name =
-                        (uiState as CharacterDetailUiState.Success)
-                            .character.name
-                            .replace(Regex("[^A-Za-z0-9_.-]"), "_")
+                    val name = uiState.character.name.replace(Regex("[^A-Za-z0-9_.-]"), "_")
                     createDocumentLauncher.launch("$name.txt")
                 } else {
                     snackbarScope.launch { snackbarHostState.showSnackbar(exportNoCharacterText) }
@@ -222,7 +214,7 @@ private fun CharacterDetailTopBar(
                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer,
             ),
-    scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+        scrollBehavior = scrollBehavior,
     )
 }
 
@@ -231,10 +223,15 @@ private fun CharacterDetailContent(
     innerPadding: PaddingValues,
     listState: androidx.compose.foundation.lazy.LazyListState,
     uiState: CharacterDetailUiState,
-    parallaxProvider: @Composable (androidx.compose.foundation.lazy.LazyListState) -> Dp,
     onRetry: () -> Unit,
 ) {
-    val parallaxOffsetDp = parallaxProvider(listState)
+    val firstOffsetPx by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex == 0) listState.firstVisibleItemScrollOffset else 0
+        }
+    }
+    val density = LocalDensity.current
+    val parallaxOffsetDp: Dp = with(density) { (firstOffsetPx / 2f).toDp() }
 
     LazyColumn(
         state = listState,
