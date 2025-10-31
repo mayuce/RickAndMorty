@@ -61,6 +61,8 @@ import coil.compose.AsyncImage
 import com.aliyuce.rickandmorty.R
 import com.aliyuce.rickandmorty.ui.components.ErrorComp
 import kotlinx.coroutines.launch
+import java.text.DateFormat
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -341,6 +343,16 @@ private fun CharacterDetailContent(
                     }
                 }
 
+                state.lastRefreshed?.let { ts ->
+                    item {
+                        Text(
+                            text = "Last refreshed: ${formatTimestamp(ts)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
+                        )
+                    }
+                }
+
                 item {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(text = stringResource(R.string.appears_in))
@@ -362,4 +374,9 @@ private fun CharacterDetailContent(
             }
         }
     }
+}
+
+private fun formatTimestamp(epochMillis: Long): String {
+    val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG)
+    return df.format(Date(epochMillis))
 }

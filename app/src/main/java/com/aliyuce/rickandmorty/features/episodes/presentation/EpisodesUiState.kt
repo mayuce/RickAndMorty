@@ -12,6 +12,7 @@ sealed interface EpisodesUiState {
         val isRefreshing: Boolean = false,
         val isLoadingMore: Boolean = false,
         val error: Throwable? = null,
+        val lastRefreshed: Long? = null,
     ) : EpisodesUiState
 
     data class Error(
