@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.aliyuce.rickandmorty.features.characterdetail.CharacterDetailRoute
+import com.aliyuce.rickandmorty.features.characterdetail.characterDetailRoute
 import com.aliyuce.rickandmorty.features.episodes.EpisodesRoute
 import com.aliyuce.rickandmorty.features.episodes.episodesRoute
 
@@ -18,9 +20,13 @@ fun AppNavHost(
         modifier = modifier,
     ) {
         episodesRoute(
-            onEpisodeClick = { episodeId ->
-                // Handle episode click navigation here
+            onEpisodeClick = { characterIdStr ->
+                // characterIdStr comes as a URL or string; extract trailing integer id
+                val id = characterIdStr.substringAfterLast('/').filter { it.isDigit() }.toIntOrNull()
+                id?.let { navController.navigate(CharacterDetailRoute.createRoute(it)) }
             },
         )
+
+        characterDetailRoute(onBack = { navController.popBackStack() })
     }
 }
