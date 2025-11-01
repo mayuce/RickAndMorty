@@ -52,6 +52,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -103,12 +104,12 @@ fun CharacterDetailScreen(
                                 is CharacterDetailUiState.Success -> {
                                     val c = state.character
                                     "" +
-                                        "Name: ${c.name}\n" +
-                                        "Status: ${c.status}\n" +
-                                        "Species: ${c.species}\n" +
-                                        "Origin: ${c.origin}\n" +
-                                        "Total episodes: ${c.episode.size}\n" +
-                                        ""
+                                            "Name: ${c.name}\n" +
+                                            "Status: ${c.status}\n" +
+                                            "Species: ${c.species}\n" +
+                                            "Origin: ${c.origin}\n" +
+                                            "Total episodes: ${c.episode.size}\n" +
+                                            ""
                                 }
 
                                 else -> "No character data"
@@ -222,7 +223,7 @@ private fun CharacterDetailTopBar(
 }
 
 @Composable
-private fun CharacterDetailContent(
+internal fun CharacterDetailContent(
     innerPadding: PaddingValues,
     listState: androidx.compose.foundation.lazy.LazyListState,
     uiState: CharacterDetailUiState,
@@ -252,7 +253,9 @@ private fun CharacterDetailContent(
                                 .fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(
+                            modifier = Modifier.testTag("character_detail_loading_indicator")
+                        )
                     }
                 }
             }

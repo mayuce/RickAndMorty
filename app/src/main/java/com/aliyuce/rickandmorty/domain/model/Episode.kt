@@ -17,6 +17,27 @@ data class Episode(
         val fake2 = Episode(id = 2, name = "Ep2", airDate = "2020-01-08", episode = "S01E02")
 
         @TestOnly
+        val pilot = Episode(
+            id = 1,
+            name = "Pilot",
+            airDate = "December 2, 2013",
+            episode = "S01E01",
+            characters = listOf("1", "2"),
+        )
+
+        @TestOnly
+        val lawnmowerDog = Episode(
+            id = 2,
+            name = "Lawnmower Dog",
+            airDate = "December 9, 2013",
+            episode = "S01E02",
+            characters = listOf("3"),
+        )
+
+        @TestOnly
+        fun sampleList() = listOf(pilot, lawnmowerDog)
+
+        @TestOnly
         fun pageOf(vararg eps: Episode, count: Int = eps.size, pages: Int = 1) =
             EpisodesPage(count = count, pages = pages, results = eps.toList())
     }
