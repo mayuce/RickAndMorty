@@ -61,6 +61,20 @@ Top-level Gradle files and wrappers are present for reproducible builds.
 
 UI is built with Jetpack Compose. The app contains an episode list, an episode detail view (character ids), and a character detail screen with an Export action. Keep the visuals simple and accessible — the assessment focuses on functionality.
 
+### Included demo video
+
+A short demo/asset video is included in the repository for reference:
+
+- Path: `./rickAndMorty.mp4`
+
+<!-- Inline video preview -->
+<video src="./rickAndMorty.mp4" controls style="max-width:100%;height:auto;" poster="" >
+  Your browser does not support the video tag. You can download and play the file directly: 
+  <a href="./rickAndMorty.mp4">rickAndMorty.mp4</a>
+</video>
+
+Note: The video is included as a demo asset — verify any reuse or redistribution against the original source/rights before publishing.
+
 
 ## Testing
 
