@@ -67,14 +67,7 @@ A short demo/asset video is included in the repository for reference:
 
 - Path: `./rickAndMorty.mp4`
 
-<!-- Inline video preview -->
-<video src="./rickAndMorty.mp4" controls style="max-width:100%;height:auto;" poster="" >
-  Your browser does not support the video tag. You can download and play the file directly: 
-  <a href="./rickAndMorty.mp4">rickAndMorty.mp4</a>
-</video>
-
-Note: The video is included as a demo asset — verify any reuse or redistribution against the original source/rights before publishing.
-
+[rickAndMorty.mp4](https://github.com/mayuce/RickAndMorty/blob/8d64019cee5fce557f3d991da401d5f5d6cab248/rickAndMorty.mp4)
 
 ## Testing
 
