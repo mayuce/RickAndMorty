@@ -43,25 +43,65 @@ Static analysis
 - `app/` — main Android app module
   - `src/main/java/com/aliyuce/rickandmorty` — application code
     - `MainActivity.kt` — app entrypoint and host for Compose
+    - `RMApp.kt` — application class for Hilt setup
     - `di/` — Hilt dependency injection modules
-    - `screens/` — Compose screens
-    - `components/` — reusable Compose UI components
+    - `data/` — data layer (repositories, data sources, models)
+    - `domain/` — domain layer (use cases, business logic)
+    - `features/` — Compose screens
     - `navigation/` — navigation host and navigation graph
-    - `ui/theme/` — Compose theme
+    - `work/` — background work 
+    - `ui/` — Compose theme and common UI components
   - `build.gradle.kts` — module build configuration
 
 Top-level Gradle files and wrappers are present for reproducible builds.
 
+## UI
+
+UI is built with Jetpack Compose. The app contains an episode list, an episode detail view (character ids), and a character detail screen with an Export action. Keep the visuals simple and accessible — the assessment focuses on functionality.
+
+
+## Testing
+
+Recommended tests: unit tests for ViewModels/use-cases (missing use-case tests) and Compose UI tests for screens. Typical commands:
+
+```bash
+# unit tests
+./gradlew test
+
+# instrumentation / UI tests (on device/emulator)
+./gradlew :app:connectedAndroidTest
+```
+
+
+## How to develop and run tests locally
+
+1. Start an emulator or connect an Android device.
+2. Build and install the debug APK:
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:installDebug
+```
+
+3. Run connected instrumentation tests (UI tests):
+
+```bash
+./gradlew :app:connectedAndroidTest
+```
+
+4. Run unit tests locally without a device:
+
+```bash
+./gradlew test
+```
+
+
 ## How to contribute
 - Follow existing code style and architecture.
 - Run `./gradlew build` and `./gradlew detekt` before submitting changes.
+- Add tests for your new features and ensure existing tests pass.
+
 
 ## Troubleshooting
 - If Gradle sync fails, try `File -> Sync Project with Gradle Files` in Android Studio.
 - If build issues persist, run `./gradlew clean build --stacktrace` to get more details.
-
-## Notes
-- No license file is included in the repository. Add `LICENSE` if you want to set one.
-- If you want me to extend this README with module-level docs, testing instructions, or CI setup, tell me what to include and I'll add it.
-
-
