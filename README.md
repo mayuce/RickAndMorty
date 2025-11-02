@@ -1,5 +1,7 @@
 # RickAndMorty (Android)
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 This repository is an Android application that appears to be a Rick and Morty themed app built with modern Android tooling.
 
 ## Summary
@@ -105,3 +107,7 @@ Recommended tests: unit tests for ViewModels/use-cases (missing use-case tests) 
 ## Troubleshooting
 - If Gradle sync fails, try `File -> Sync Project with Gradle Files` in Android Studio.
 - If build issues persist, run `./gradlew clean build --stacktrace` to get more details.
+
+## License
+
+This project is licensed under the Apache License 2.0 — see the `LICENSE` file for details.
